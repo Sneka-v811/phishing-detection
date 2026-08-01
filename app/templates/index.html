@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Phishing Website Detector</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --danger-border: #ef4444;
+            --danger-text: #f87171;
+            --success-bg: rgba(16, 185, 129, 0.15);
+            --success-border: #10b981;
+            --success-text: #34d399;
+            --warning-bg: rgba(245, 158, 11, 0.15);
+            --warning-text: #fbbf24;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #a5b4fc;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        /* Form Card */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0.75rem;
+            flex-direction: column;
+        }
+
+        @media (min-width: 640px) {
+            .search-box {
+                flex-direction: row;
+            }
+        }
+
+        .input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        button.btn-check {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button.btn-check:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Demo Buttons */
+        .demo-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .demo-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .btn-demo {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-demo:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Result Section */
+        .result-card {
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card.phishing {
+            background: var(--danger-bg);
+            border: 1px solid var(--danger-border);
+        }
+
+        .result-card.legitimate {
+            background: var(--success-bg);
+            border: 1px solid var(--success-border);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 1.25rem;
+            border-radius: 12px;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .phishing .status-badge {
+            background: #ef4444;
+            color: #ffffff;
+        }
+
+        .legitimate .status-badge {
+            background: #10b981;
+            color: #ffffff;
+        }
+
+        .confidence-box {
+            text-align: right;
+        }
+
+        .confidence-val {
+            font-size: 1.75rem;
+            font-weight: 800;
+        }
+
+        .phishing .confidence-val { color: var(--danger-text); }
+        .legitimate .confidence-val { color: var(--success-text); }
+
+        .confidence-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.6s ease;
+        }
+
+        .phishing .progress-bar-fill { background: #ef4444; }
+        .legitimate .progress-bar-fill { background: #10b981; }
+
+        .analyzed-url {
+            font-family: monospace;
+            word-break: break-all;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+        }
+
+        /* Features Breakdown Grid */
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .grid-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+
+        .feature-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .feature-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        .tag.normal { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .tag.warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        .tag.danger { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+        .feature-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            color: var(--text-main);
+        }
+
+        .feature-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .error-card {
+            background: var(--danger-bg);
+            border: 1px solid var(--danger-border);
+            color: var(--danger-text);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: auto;
+            padding-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo-badge">
+                <span>🛡️</span> AI Machine Learning Security
+            </div>
+            <h1>Real-Time Phishing Detector</h1>
+            <p class="subtitle">Enter a website link below to classify its safety using feature analysis</p>
+        </header>
+
+        <!-- Search Form Card -->
+        <div class="card">
+            <form method="POST" action="/">
+                <div class="search-box">
+                    <div class="input-wrapper">
+                        <input 
+                            type="text" 
+                            name="url" 
+                            id="urlInput" 
+                            placeholder="e.g. http://login.paypal.verify-account.com" 
+                            value="{{ result.url if result and result.url else '' }}" 
+                            required 
+                            autofocus
+                        >
+                    </div>
+                    <button type="submit" class="btn-check">
+                        <span>🔍</span> Check URL
+                    </button>
+                </div>
+            </form>
+
+            <!-- Quick Demo Preset Buttons -->
+            <div class="demo-buttons">
+                <span class="demo-label">Try Examples:</span>
+                <button class="btn-demo" onclick="setDemo('https://www.google.com')">Legitimate (Google)</button>
+                <button class="btn-demo" onclick="setDemo('http://192.168.1.100/login/verify-account')">Phishing (IP & Keywords)</button>
+                <button class="btn-demo" onclick="setDemo('http://secure-paypal-login.update-info.com/verify')">Phishing (Spoofed Subdomain)</button>
+            </div>
+        </div>
+
+        {% if result %}
+            {% if result.error %}
+                <div class="error-card">
+                    ⚠️ <strong>Error:</strong> {{ result.error }}
+                </div>
+            {% else %}
+                <!-- Result Banner -->
+                <div class="result-card {{ 'phishing' if result.is_phishing else 'legitimate' }}">
+                    <div class="result-header">
+                        <div class="status-badge">
+                            <span>{{ '🚨' if result.is_phishing else '✅' }}</span>
+                            <span>{{ result.label }}</span>
+                        </div>
+                        <div class="confidence-box">
+                            <div class="confidence-val">{{ result.confidence }}%</div>
+                            <div class="confidence-label">Confidence Score</div>
+                        </div>
+                    </div>
+
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: {{ result.confidence_float }}%;"></div>
+                    </div>
+
+                    <div class="analyzed-url">
+                        <strong>Target URL:</strong> {{ result.url }}
+                    </div>
+                </div>
+
+                <!-- Feature Breakdown Grid -->
+                <div class="card">
+                    <div class="section-title">
+                        <span>📊</span> Feature Extraction & Risk Analysis
+                    </div>
+                    
+                    <div class="grid-features">
+                        {% for feature in result.features %}
+                            <div class="feature-card">
+                                <div>
+                                    <div class="feature-top">
+                                        <span class="feature-name">{{ feature.name }}</span>
+                                        <span class="tag {{ feature.status }}">{{ feature.status }}</span>
+                                    </div>
+                                    <div class="feature-value">{{ feature.value }}</div>
+                                </div>
+                                <div class="feature-desc">{{ feature.desc }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        <footer>
+            AI-Based Real-Time Phishing Website Detection System • Final Year Project Demo
+        </footer>
+    </div>
+
+    <script>
+        function setDemo(url) {
+            document.getElementById('urlInput').value = url;
+        }
+    </script>
+</body>
+</html>
