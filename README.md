@@ -1,66 +1,65 @@
-# AI-Based Real-Time Phishing Website Detection System
+# 🛡️ AI Phishing Website Detector
+
+A real-time phishing website detection web app powered by machine learning. Enter any URL and the app analyzes it instantly to determine whether it's likely safe or a phishing attempt.
 
 ## 🚀 Live Demo
 [https://phishing-detection-h79s.onrender.com](https://phishing-detection-h79s.onrender.com)
 
-## Overview
-This project is an AI-powered system designed to detect whether a given URL or website is **Phishing** or **Legitimate** using Machine Learning.
+> ⚠️ Note: The app is hosted on a free tier, so it may take up to 50 seconds to load if it's been inactive.
 
-The system works by extracting key syntactic and domain features from URLs (such as URL length, presence of `@` symbols, IP address usage, subdomains, and suspicious keywords), and using a classification algorithm trained on historical data to predict safety in real time.
+## 📋 How It Works
 
----
+The app extracts key features from a given URL and feeds them into a trained machine learning model to classify it as **Safe** or **Phishing**, along with a confidence score.
 
-## Folder Structure
+**Features analyzed:**
+- URL length
+- Number of dots / subdomains
+- Presence of `@` symbol
+- Hyphens in domain (brand imitation check)
+- HTTPS usage
+- Whether the domain is a raw IP address
+- Suspicious keywords (e.g. login, verify, secure, account)
 
-```text
+## 🛠️ Tech Stack
+
+- **Backend:** Python, Flask
+- **Machine Learning:** scikit-learn
+- **Data Handling:** pandas, numpy
+- **Deployment:** Render (Gunicorn WSGI server)
+- **Frontend:** HTML/CSS (Flask templates)
+
+## 💻 Running Locally
+
+1. Clone the repo:
+   git clone https://github.com/Sneka-v811/phishing-detection.git
+   cd phishing-detection
+
+2. Install dependencies:
+   pip install -r requirements.txt
+
+3. Run the app:
+   python app/app.py
+
+4. Open your browser at http://127.0.0.1:5000
+
+## 📁 Project Structure
+
 phishing-detection/
-│
-├── data/                  # Storage directory for the training dataset (CSV)
-│
-├── src/                   # Source code modules
-│   ├── feature_extraction.py  # Extracts lexical & domain features from URLs
-│   ├── train_model.py         # Model training pipeline (Random Forest / Decision Tree)
-│   └── predict.py             # Inference module to classify single URLs
-│
-├── app/                   # Web application interface
-│   ├── app.py             # Flask backend app
+├── app/
+│   ├── app.py              # Flask application
 │   └── templates/
-│       └── index.html     # HTML frontend user interface
-│
-├── requirements.txt       # Project Python library dependencies
-└── README.md              # Project overview and setup instructions
-```
+│       └── index.html      # Frontend UI
+├── src/
+│   ├── feature_extraction.py
+│   ├── train_model.py
+│   ├── predict.py
+│   └── model.pkl           # Trained ML model
+├── data/
+│   ├── legit_urls.csv
+│   └── phishing_urls.csv
+├── requirements.txt
+└── Procfile
 
----
+## 📌 Disclaimer
 
-## Setup & Installation
-
-### 1. Environment Setup (Recommended)
-It is recommended to use a Python virtual environment.
-
-```bash
-# Navigate to project directory
-cd phishing-detection
-
-# Create a virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# macOS/Linux:
-source venv/bin/activate
-```
-
-### 2. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## Quick Test: Feature Extraction
-To verify that feature extraction is working:
-```bash
-python src/feature_extraction.py
-```
+This tool is built for educational purposes to demonstrate ML-based phishing detection. It should not be used as the sole method for verifying website safety in production environments.
